@@ -48,7 +48,7 @@ class Particle {
         std::mt19937 gen(rd());
         std::uniform_real_distribution<> distrib(0, 1);
 
-        int r = 20 + std::ceil(distrib(gen) * 30);
+        int r = 30 + std::ceil(distrib(gen) * 30);
         std::pair<float, float> spos = {distrib(gen) * (window.getSize().x - 2 * r),
                                         distrib(gen) * (window.getSize().y - 2 * r)};
         std::pair<float, float> svel = {distrib(gen) / 25, distrib(gen) / 25};
@@ -122,7 +122,7 @@ class Particle {
 };
 
 int main() {
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Simulation");
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Collision Simulation");
     std::vector<Particle> particles;
 
     for (size_t i = 0; i < NUM_PARTICLES; ++i) {
