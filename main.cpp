@@ -1,14 +1,21 @@
+#include <SDL2/SDL.h>
+#include <SDL2/SDL_mixer.h>
+
 #include <SFML/Graphics.hpp>
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 #include <random>
 #include <utility>
 
+Mix_Chunk *initializeSoundEffects();
+
 const double PI = M_PI;
-
-const size_t NUM_PARTICLES = 50;
-
+const size_t NUM_PARTICLES = 10;
 const bool COLLISIONS = true;
+
+/* Initialize sound effects */
+Mix_Chunk *collisionSound = initializeSoundEffects();
 
 float dotProduct(const sf::Vector2f &vec1, const sf::Vector2f &vec2) {
     return vec1.x * vec2.x + vec1.y * vec2.y;
@@ -81,9 +88,15 @@ class Particle {
 
         if (pos.x < 0 || pos.x > window->getSize().x - radius * 2) {
             velocity.x = -velocity.x;
+
+            // Sound effect
+            Mix_PlayChannel(-1, collisionSound, 0);
         }
         if (pos.y < 0 || pos.y > window->getSize().y - radius * 2) {
             velocity.y = -velocity.y;
+
+            // Sound effect
+            Mix_PlayChannel(-1, collisionSound, 0);
         }
     }
 
@@ -110,10 +123,6 @@ class Particle {
 
 int main() {
     sf::RenderWindow window(sf::VideoMode(800, 600), "Simulation");
-
-    // Particle p1(50, {400.0, 300.0}, {0.01, 0.02}, sf::Color::Red, window);
-    // // Particle p2(100, {200.0, 100.0}, {0.02, 0.01}, sf::Color::Blue, window);
-
     std::vector<Particle> particles;
 
     for (size_t i = 0; i < NUM_PARTICLES; ++i) {
@@ -139,6 +148,8 @@ int main() {
 
     while (window.isOpen()) {
         sf::Event event;
+
+        // TODO delete this?
         while (window.pollEvent(event)) {
             if (event.type == sf::Event::Closed) {
                 window.close();
@@ -162,13 +173,16 @@ int main() {
 
                         particles[i].setVelocity(newVel1);
                         particles[j].setVelocity(newVel2);
+
+                        // Sound effect
+                        Mix_PlayChannel(-1, collisionSound, 0);
                     }
                 }
             }
 
-            /*
-            TODO: Implement optimized collision detection algorithm!
+            /* TODO: Implement optimized collision detection algorithm!
             Sweep and Prune or Uniform Grid Partitioning algorithm? */
+
             window.clear();
 
             for (size_t i = 0; i < NUM_PARTICLES; ++i) {
@@ -178,6 +192,31 @@ int main() {
             window.display();
         }
     }
+    Mix_FreeChunk(collisionSound);
+    Mix_CloseAudio();
+    SDL_Quit();
 
     return 0;
+}
+
+Mix_Chunk *initializeSoundEffects() {
+    if (SDL_Init(SDL_INIT_AUDIO) < 0) {
+        std::cout << "SDL initialization failed!";
+        exit(1);
+    }
+
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) < 0) {
+        std::cout << "Audio initialization failed!";
+        exit(1);
+    }
+
+    Mix_Chunk *collisionSound = Mix_LoadWAV("./Collision.wav");
+    if (collisionSound == NULL) {
+        std::cout << "Error loading collision sound!";
+        exit(1);
+    }
+
+    Mix_VolumeChunk(collisionSound, MIX_MAX_VOLUME / 2);
+
+    return collisionSound;
 }

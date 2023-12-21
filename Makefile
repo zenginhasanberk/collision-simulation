@@ -4,11 +4,17 @@ SRC := main.cpp
 
 OUT := main
 
-SFML_INCLUDE := /opt/homebrew/Cellar/sfml/2.6.1/include
-SFML_LIB := /opt/homebrew/Cellar/sfml/2.6.1/lib
+# Using pkg-config here because of problems with linking SDL files
+SFML_CXXFLAGS := `pkg-config --cflags sfml-graphics sfml-window sfml-system`
+SDL_CXXFLAGS := `pkg-config --cflags sdl2 SDL2_mixer`
 
-CXXFLAGS := -std=c++17 -I$(SFML_INCLUDE)
-LDFLAGS := -L$(SFML_LIB) -lsfml-graphics -lsfml-window -lsfml-system
+SFML_LDFLAGS := `pkg-config --libs sfml-graphics sfml-window sfml-system`
+SDL_LDFLAGS := `pkg-config --libs sdl2 SDL2_mixer`
+
+CXXFLAGS := -std=c++17 $(SFML_CXXFLAGS) $(SDL_CXXFLAGS)
+LDFLAGS := $(SFML_LDFLAGS) $(SDL_LDFLAGS)
+
+
 
 $(OUT): $(SRC)
 	$(CXX) $(SRC) -o $(OUT) $(CXXFLAGS) $(LDFLAGS)
