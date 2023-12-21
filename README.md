@@ -1,4 +1,4 @@
-# Physics simulation in C++
+# Collision simulation in C++
 
-This is a personal project that I am working on. I am exploring different physics simulations using C++.
+This is a personal project where I am exploring 2D collision simulations and relevant algorithms for optimization.
 
